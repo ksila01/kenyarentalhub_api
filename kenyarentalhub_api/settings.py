@@ -79,9 +79,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # MySQL backend
         'NAME': 'kenyarentalhub_db',          # Your database name
-        'USER': '127.0.0.1',                 # MySQL user
-        'PASSWORD': 'StrongPassword123!',     # MySQL password
-        'HOST': '127.0.0.1',                  # Database host
+        'USER': 'root',                 # MySQL user
+        'PASSWORD': 'salomeK2020!',     # MySQL password
+        'HOST': 'localhost',                  # Database host
         'PORT': '3306',                        # Default MySQL port
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
