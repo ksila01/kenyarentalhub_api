@@ -1,1 +1,0 @@
-# kenyarentalhub_api
