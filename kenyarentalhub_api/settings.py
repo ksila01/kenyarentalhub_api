@@ -64,21 +64,39 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "kenyarentalhub_api.wsgi.application"
+import os
+from urllib.parse import urlparse
 
-# ---------- MySQL ----------
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://kelvin:UyaTIzErsGTWlwCzB5th0K891X9sePtg@dpg-d2nfes75r7bs73fh5pd0-a.oregon-postgres.render.com/capstone_project_feex')  # External DB URL
+db_from_env = urlparse(DATABASE_URL)
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "kenyarentalhub_api",
-        "USER": "root",           # or "root"
-        "PASSWORD": "salomeK2020!",  # or your root password
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'capstone_project_feex'),  # Database name
+        'USER': os.getenv('DB_USER', 'kelvin'),  # Username
+        'PASSWORD': os.getenv('DB_PASSWORD', 'UyaTIzErsGTWlwCzB5th0K891X9sePtg'),  # Password
+        'HOST': os.getenv('DB_HOST', 'dpg-d2nfes75r7bs73fh5pd0-a'),  # Hostname
+        'PORT': os.getenv('DB_PORT', '5432'),  # Port (default for PostgreSQL)
     }
 }
+
+# ---------- MySQL ----------
+#DATABASES = {
+    #"default": {
+      #  "ENGINE": "django.db.backends.mysql",
+      #  "NAME": "kenyarentalhub_api",
+       # "USER": "root",           # or "root"
+       # "PASSWORD": "salomeK2020!",  # or your root password
+      #  "HOST": "localhost",
+      #  "PORT": "3306",
+       # "OPTIONS": {
+        #    "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+      #  },
+    #}
+#}
+
+
 
 # Use the custom user BEFORE first migrate
 AUTH_USER_MODEL = "api.User"
@@ -100,10 +118,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # Add this
+
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
 TEMPLATES = [
     {
