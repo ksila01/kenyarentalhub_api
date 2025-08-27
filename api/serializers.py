@@ -69,3 +69,23 @@ class RentalApplicationSerializer(serializers.ModelSerializer):
         validated_data["tenant"] = self.context["request"].user
         return super().create(validated_data)
 
+from .models import Payment
+
+class PaymentSerializer(serializers.ModelSerializer):
+    tenant = serializers.ReadOnlyField(source="application.tenant.username")
+    property_name = serializers.ReadOnlyField(source="application.property.name")
+
+    class Meta:
+        model = Payment
+        fields = ["id", "application", "tenant", "property_name", "amount", "status", "transaction_id", "created_at"]
+        read_only_fields = ["id", "status", "transaction_id", "created_at", "tenant", "property_name"]
+from .models import Review
+
+class ReviewSerializer(serializers.ModelSerializer):
+    tenant = serializers.ReadOnlyField(source="tenant.username")
+    property_name = serializers.ReadOnlyField(source="property.name")
+
+    class Meta:
+        model = Review
+        fields = ["id", "property", "property_name", "tenant", "rating", "comment", "created_at"]
+        read_only_fields = ["id", "tenant", "property_name", "created_at"]

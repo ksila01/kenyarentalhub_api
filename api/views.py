@@ -85,8 +85,8 @@ class RentalApplicationViewSet(viewsets.ModelViewSet):
         return [AllowAny()]
 
     def perform_create(self, serializer):
-       # serializer.save(tenant=self.request.user)
-        serializer.save ()
+        serializer.save(tenant=self.request.user)
+        
 
     def get_queryset(self):
         user = self.request.user
@@ -115,3 +115,34 @@ class RentalApplicationViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
+from .models import Payment
+from .serializers import PaymentSerializer
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    serializer_class = PaymentSerializer
+    queryset = Payment.objects.select_related("application", "application__tenant", "application__property").all()
+
+    def get_permissions(self):
+        if self.action in ["create"]:
+            return [IsAuthenticated(), IsTenant()]
+        return [IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        application = serializer.validated_data["application"]
+        if application.tenant != self.request.user:
+            raise PermissionError("You can only pay for your own applications.")
+        serializer.save()
+from .models import Review
+from .serializers import ReviewSerializer
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    queryset = Review.objects.select_related("property", "tenant").all()
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [IsAuthenticated(), IsTenant()]
+        return [AllowAny()]
+
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user)

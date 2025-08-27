@@ -13,3 +13,6 @@ class IsOwnerOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return bool(request.user and request.user.is_authenticated and obj.landlord_id == request.user.id)
+class IsAuthenticatedPayment(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
