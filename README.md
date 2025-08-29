@@ -87,8 +87,5 @@ The application exposes several REST API endpoints using Django REST Framework (
 ### Authentication:
 - The API uses **JWT Authentication** and **Session Authentication**. You can obtain a token using the `POST /api/auth/login/` endpoint.
 
-## **Testing**
-
-To run automated tests, use the following command:
 
 
