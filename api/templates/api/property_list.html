@@ -1,0 +1,21 @@
+<!-- templates/api/property_list.html -->
+{% extends 'base_generic.html' %}
+{% load static %}
+{% block content %}
+  <h1>Available Properties</h1>
+  <ul class="property-list">
+    {% for property in properties %}
+      <li class="property-item">
+        {% if property.image %}
+          <img src="{{ property.image.url }}" alt="{{ property.name }}" class="property-image">
+        {% else %}
+          <img src="{% static 'images/default-property.jpg' %}" alt="No Image" class="property-image">
+        {% endif %}
+        <h2><a href="{% url 'property_detail' pk=property.pk %}">{{ property.name }}</a></h2>
+        <p>{{ property.location }}</p>
+        <p>Price: ${{ property.price }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+

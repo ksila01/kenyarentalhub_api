@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
+from django.db import IntegrityError
 from rest_framework import serializers
 
-from .models import Property, RentalApplication
+from .models import Property, RentalApplication, Payment, Review
 
 User = get_user_model()
 
@@ -39,7 +40,10 @@ class PropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Property
-        fields = ["id", "landlord", "name", "category", "description", "location", "price", "is_available", "created_at"]
+        fields = [
+            "id", "landlord", "name", "category", "description",
+            "location", "price", "is_available", "created_at", "image"
+        ]
         read_only_fields = ["id", "landlord", "created_at"]
 
 
@@ -67,9 +71,11 @@ class RentalApplicationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data["tenant"] = self.context["request"].user
-        return super().create(validated_data)
+        try:
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError("You have already applied for this property.")
 
-from .models import Payment
 
 class PaymentSerializer(serializers.ModelSerializer):
     tenant = serializers.ReadOnlyField(source="application.tenant.username")
@@ -79,7 +85,12 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ["id", "application", "tenant", "property_name", "amount", "status", "transaction_id", "created_at"]
         read_only_fields = ["id", "status", "transaction_id", "created_at", "tenant", "property_name"]
-from .models import Review
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be greater than 0.")
+        return value
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     tenant = serializers.ReadOnlyField(source="tenant.username")

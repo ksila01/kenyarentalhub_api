@@ -1,0 +1,9 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+<h1>Apply for {{ property.name }}</h1>
+<form method="post">
+  {% csrf_token %}
+  <textarea name="message" placeholder="Message to landlord"></textarea><br>
+  <button type="submit">Submit Application</button>
+</form>
+{% endblock %}

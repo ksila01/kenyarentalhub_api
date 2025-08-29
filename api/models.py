@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # -------- Custom User --------
 class User(AbstractUser):
@@ -35,6 +36,7 @@ class Property(models.Model):
     description = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.ImageField(upload_to="property_images/", blank=True, null=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -59,13 +61,15 @@ class RentalApplication(models.Model):
 
     def __str__(self):
         return f"{self.tenant.username} -> {self.property.name} ({self.status})"
+
+
 class Payment(models.Model):
     application = models.ForeignKey(
         RentalApplication,
         on_delete=models.CASCADE,
         related_name="payments"
     )
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
     status = models.CharField(
         max_length=50,
         choices=[("pending", "Pending"), ("completed", "Completed"), ("failed", "Failed")],
@@ -81,7 +85,7 @@ class Payment(models.Model):
 class Review(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="reviews")
     tenant = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews")
-    rating = models.IntegerField()  # 1–5 scale
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])  # 1–5 scale
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

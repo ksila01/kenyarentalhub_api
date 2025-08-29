@@ -1,0 +1,53 @@
+<!-- templates/base_generic.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Property Rental Hub{% endblock %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <header>
+    <h1>
+      <a href="{% url 'property_list' %}">
+        <img src="{% static 'images/logo.png' %}" alt="Property Rental Hub logo"
+             style="height:84px; vertical-align:middle; margin-right:10px;">
+        Property Rental Hub
+      </a>
+    </h1>
+    <nav>
+      <ul>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'property_list' %}">Home</a></li>
+          {% if user.role == "landlord" %}
+            <li><a href="{% url 'property_create' %}">Add Property</a></li>
+          {% endif %}
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+          <li><a href="{% url 'login' %}">Login</a></li>
+          <li><a href="{% url 'register' %}">Register</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Property Rental Hub</p>
+  </footer>
+</body>
+</html>

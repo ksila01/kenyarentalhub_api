@@ -1,0 +1,142 @@
+<!-- templates/api/property_detail.html -->
+{% extends 'base_generic.html' %}
+{% load static %}
+{% block content %}
+  <h1>{{ property.name }}</h1>
+
+  {% if property.image %}
+    <p><img src="{{ property.image.url }}" alt="{{ property.name }}" class="property-image"></p>
+  {% else %}
+    <p><img src="{% static 'images/default-property.jpg' %}" alt="No Image" class="property-image"></p>
+  {% endif %}
+
+  <p>{{ property.description }}</p>
+  <p><strong>Location:</strong> {{ property.location }}</p>
+  <p><strong>Price:</strong> ${{ property.price }}</p>
+
+  {% if user.is_authenticated %}
+    <h2>Apply for this Property</h2>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <textarea name="message" placeholder="Why do you want to rent this property?" required></textarea><br>
+      <button type="submit">Apply</button>
+    </form>
+  {% else %}
+    <p>Please <a href="{% url 'login' %}">login</a> to apply.</p>
+  {% endif %}
+
+  {% if user.is_authenticated and user.role == "tenant" and user_application %}
+    <hr>
+    <section class="tenant-application">
+      <h2>Your Application</h2>
+      <p>Status: <strong>{{ user_application.status|title }}</strong></p>
+
+      {% if user_payment %}
+        <p>Latest payment status: <strong>{{ user_payment.status|title }}</strong>
+           {% if user_payment.transaction_id %} (Txn: {{ user_payment.transaction_id }}){% endif %}</p>
+      {% endif %}
+
+      {% if user_application.status == "approved" and not user_payment %}
+        <p>
+          <a href="{% url 'payment_create' application_id=user_application.id %}" class="btn">Pay now</a>
+        </p>
+      {% elif user_application.status != "approved" %}
+        <p><em>Payment will be available after approval.</em></p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  {% if user.is_authenticated and user.role == "landlord" and property.landlord_id == user.id %}
+    <hr>
+    <section class="applications">
+      <h2>Applications</h2>
+      {% if landlord_applications %}
+        <ul class="review-list">
+          {% for a in landlord_applications %}
+            <li class="review-item">
+              <div class="review-meta">
+                <strong>@{{ a.tenant.username }}</strong>
+                · {{ a.created_at|date:"M j, Y" }}
+                · Status: <strong>{{ a.status|title }}</strong>
+              </div>
+              {% if a.message %}
+                <p class="review-comment">{{ a.message }}</p>
+              {% endif %}
+
+              <form method="post" action="{% url 'application_update_status' application_id=a.id %}" style="display:inline-block;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="approved">
+                <button type="submit" class="btn">Approve</button>
+              </form>
+
+              <form method="post" action="{% url 'application_update_status' application_id=a.id %}" style="display:inline-block; margin-left:8px;">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="rejected">
+                <button type="submit" class="btn" style="background:#b00020;">Reject</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No applications yet.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <hr>
+  <section class="reviews">
+    <h2>Reviews</h2>
+
+    {% if review_count > 0 %}
+      <p>
+        <strong>Average rating:</strong> {{ avg_rating|floatformat:1 }} / 5
+        <span>({{ review_count }} review{{ review_count|pluralize }})</span>
+      </p>
+      <ul class="review-list">
+        {% for r in reviews %}
+          <li class="review-item">
+            <div class="review-meta">
+              <strong>@{{ r.tenant.username }}</strong>
+              · Rating: {{ r.rating }}/5
+              · {{ r.created_at|date:"M j, Y" }}
+            </div>
+            {% if r.comment %}
+              <p class="review-comment">{{ r.comment }}</p>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No reviews yet.</p>
+    {% endif %}
+
+    {% if user.is_authenticated and user.role == "tenant" %}
+      {% if not user_has_reviewed %}
+        <h3>Leave a review</h3>
+        <form method="post" action="{% url 'property_review_create' pk=property.id %}">
+          {% csrf_token %}
+          <label for="rating">Rating (1–5):</label>
+          <select id="rating" name="rating" required>
+            <option value="" selected disabled>Select</option>
+            <option value="1">1 - Poor</option>
+            <option value="2">2</option>
+            <option value="3">3 - Okay</option>
+            <option value="4">4</option>
+            <option value="5">5 - Excellent</option>
+          </select>
+          <br>
+          <textarea name="comment" placeholder="Share your experience (optional)" rows="4"></textarea><br>
+          <button type="submit">Submit Review</button>
+        </form>
+      {% else %}
+        <p><em>You’ve already reviewed this property.</em></p>
+      {% endif %}
+    {% elif user.is_authenticated %}
+      <p><em>Only tenants can leave reviews.</em></p>
+    {% else %}
+      <p><a href="{% url 'login' %}">Log in</a> to leave a review.</p>
+    {% endif %}
+  </section>
+{% endblock %}
+

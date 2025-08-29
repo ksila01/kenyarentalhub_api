@@ -1,0 +1,15 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+  <h1>Make Payment</h1>
+  <p><strong>Property:</strong> {{ application.property.name }}</p>
+  <p><strong>Location:</strong> {{ application.property.location }}</p>
+  <p><strong>Your application status:</strong> {{ application.status|title }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Payment</button>
+  </form>
+
+  <p><a href="{% url 'property_detail' pk=application.property.id %}">Back to property</a></p>
+{% endblock %}
