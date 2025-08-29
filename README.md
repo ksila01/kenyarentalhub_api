@@ -1,7 +1,7 @@
 # **Kenya Rental Hub**
 
 Kenya Rental Hub is a property rental platform built with **Django** and **Django REST Framework** (DRF). This platform allows tenants to browse available properties, apply for them, leave reviews, and make payments, while landlords can list their properties, manage applications, and approve/reject them.
-![](./static/images/logo.png)
+<img src="./static/images/logo.png" alt="Logo" width="200"/>
 ## **Table of Contents**
 - [Project Setup](#project-setup)
 - [Features](#features)
