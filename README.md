@@ -11,6 +11,7 @@ Kenya Rental Hub is a property rental platform built with **Django** and **Djang
 - [Frontend Endpoints](#frontend-endpoints)
 - [Django Admin](#django-admin)
 - [API Endpoints](#api-endpoints)
+- [CRUD Operations](#crud-operations)
 
 ## **Project Setup**
 
@@ -86,6 +87,30 @@ The application exposes several REST API endpoints using Django REST Framework (
 
 ### Authentication:
 - The API uses **JWT Authentication** and **Session Authentication**. You can obtain a token using the `POST /api/auth/login/` endpoint.
+
+## **CRUD Operations**
+
+This application utilizes the full range of **CRUD (Create, Read, Update, Delete)** operations across various models. Below is a breakdown of how CRUD is applied:
+
+### **Create**:
+- **Properties**: Landlords can create new property listings via the `POST /api/properties/` API and the `property_create` view.
+- **Rental Applications**: Tenants can submit rental applications via the `POST /api/applications/` API and the `application_create` view.
+- **Payments**: Tenants can make payments for their approved applications via the `POST /api/payments/` API and the `payment_create` view.
+- **Reviews**: Tenants can submit reviews for properties via the `POST /api/reviews/` API and the `property_review_create` view.
+
+### **Read**:
+- **Properties**: Both tenants and landlords can view property listings. Tenants can view property details, and landlords can see their properties.
+- **Rental Applications**: Both tenants and landlords can view applications. Tenants can see their applications, and landlords can view applications for their properties.
+- **Payments**: Tenants can view the status of their payments, and landlords can see payment statuses for their properties.
+- **Reviews**: Tenants can view reviews for properties.
+
+### **Update**:
+- **Rental Applications**: Landlords can update the status of rental applications (e.g., approve or reject) via the `PATCH /api/applications/<id>/` API and `application_update_status` view.
+- **Reviews**: Tenants can update their reviews, if needed (based on your business rules).
+
+### **Delete**:
+- **Properties**: Landlords can delete their properties through the Django Admin or via the API.
+- **Rental Applications**: Landlords or tenants can delete their applications through the Django Admin or via custom endpoints if needed (not implemented in this version).
 
 
 
