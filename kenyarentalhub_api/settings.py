@@ -1,10 +1,20 @@
+import os, dj_database_url
 from pathlib import Path
-import os
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = "dev-only-change-in-prod"
-DEBUG = True
-ALLOWED_HOSTS = []
+#DEBUG = True
+#ALLOWED_HOSTS = []
+SECRET_KEY = os.environ.get("SECRET_KEY", "change-me")
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = [".onrender.com", os.environ.get("EXTRA_ALLOWED_HOST", "")]
+CSRF_TRUSTED_ORIGINS = [f'https://{os.environ.get("EXTRA_ALLOWED_HOST","")}'] if os.environ.get("EXTRA_ALLOWED_HOST") else [ ]
+
+DATABASES = {
+    "default": dj_database_url.config(
+        default=os.environ["DATABASE_URL"],  # use Internal URL inside Render
+        conn_max_age=600
+    )
+}
 
 # Security flags (conditional so local dev works)
 CSRF_COOKIE_SECURE = not DEBUG
@@ -32,6 +42,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -56,19 +68,19 @@ TEMPLATES = [
 WSGI_APPLICATION = "kenyarentalhub_api.wsgi.application"
 
 # ---------- MySQL ----------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "kenyarentalhub_api",
-        "USER": "root",
-        "PASSWORD": "salomeK2020!",
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
-}
+#DATABASES = {
+    #"default": {
+      #  "ENGINE": "django.db.backends.mysql",
+       # "NAME": "kenyarentalhub_api",
+       # "USER": "root",
+       # "PASSWORD": "salomeK2020!",
+       # "HOST": "localhost",
+       # "PORT": "3306",
+       # "OPTIONS": {
+        #    "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        #},
+    #}
+#}
 
 # Use the custom user BEFORE first migrate
 AUTH_USER_MODEL = "api.User"
@@ -80,8 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'          # or use: reverse('property_list')
-LOGOUT_REDIRECT_URL = '/login/'   # optional; matches your LogoutView next_pag
+LOGIN_REDIRECT_URL = '/'          
+LOGOUT_REDIRECT_URL = '/login/'   
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -108,4 +120,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-STATIC_URL = '/static/'
+
+STORAGES = {
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}
+}
